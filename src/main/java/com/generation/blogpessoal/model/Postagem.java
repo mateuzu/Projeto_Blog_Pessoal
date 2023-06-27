@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -24,12 +27,20 @@ public class Postagem {
 	@Size(min = 3, max = 100) //determinando o tamanho do atributo
 	private String titulo;
 	
-	@NotBlank
+	@NotBlank //diferença entre not null e not blank: not null aceita espaço em branco, not blank nao
 	@Size(min = 5, max = 1000)
 	private String texto;
 	
 	@UpdateTimestamp
 	private LocalDateTime data;
+	
+	@ManyToOne //determinando a relação entre as classes, N:1, ou seja, muitas postagens para um tema
+	/*
+	 * @JsonIgnoreProperties = //determinando que o JSON deve ignorar as propriedades (postagens) relacionadas no retorno do bando de dados, para evitar um loop infinito
+	 * Sem essa anotação, o Json vai trazer uma postagem, um tema relacionado, uma postagem relacionada ao tema e entrar em loop. Dessa forma, a anotação irá retornar apenas uma postagem e um tema relacionado, ignorando o que vem depois
+	 */
+	@JsonIgnoreProperties("postagem") 
+	private Tema tema; //referenciando a outra classe (tabela) para determinar que o seu id será uma chave estrangeira
 
 	public Long getId() {
 		return id;
@@ -61,6 +72,14 @@ public class Postagem {
 
 	public void setData(LocalDateTime data) {
 		this.data = data;
+	}
+
+	public Tema getTema() {
+		return tema;
+	}
+
+	public void setTema(Tema tema) {
+		this.tema = tema;
 	}
 	
 }

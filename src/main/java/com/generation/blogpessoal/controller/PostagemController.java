@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.generation.blogpessoal.model.Postagem;
 import com.generation.blogpessoal.repository.PostagemRepository;
+import com.generation.blogpessoal.repository.TemaRepository;
 
 import jakarta.validation.Valid;
 
@@ -21,6 +22,9 @@ public class PostagemController {
 
 	@Autowired //determinando inleção de dependência
 	private PostagemRepository postagemRepository;
+	
+	@Autowired
+	private TemaRepository temaRepository;
 	
 	@GetMapping //requisiçao GET
 	public ResponseEntity<List<Postagem>> getAll() { //os métodos serão do tipo ResponseEntity, visto que ele tem a função de RESPONDER uma requisição HTTP
@@ -47,15 +51,23 @@ public class PostagemController {
 	 * Em resumo, a anotacao é usada para "converter" a solicitacao HTTP(request) em um objeto Java para atualização das informações
 	*/
 	public ResponseEntity<Postagem> post(@Valid @RequestBody Postagem postagem) { //parametro recebe toda a estrutura da postagem (titulo, texto) e não somente um atributo
-		return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem)); //salvando as informações dentro do banco de dados
+		if(temaRepository.existsById(postagem.getTema().getId())) { //testando se existe um tema com o id informado na Postagem
+			return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem)); //salvando as informações dentro do banco de dados
+		}
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tema não existe!", null); //caso não exista, lança uma exceção
 	}
 	
 	@PutMapping //determinando que o método irá atualizar informações para o banco de dados, respondendo requisições do tipo HTTP PUT
 	public ResponseEntity<Postagem> put (@Valid @RequestBody Postagem postagem) { 
-		return postagemRepository.findById(postagem.getId()) //irá retornar uma postagem, caso seja encontrado a partir do id informado
-				.map(resposta -> ResponseEntity.status(HttpStatus.OK) //encapsula e mapeia o objeto para verificar se existe, se sim, esse objeto será atualizado
-						.body(postagemRepository.save(postagem))) // o objeto já presente no banco de dados será atualizado pelo objeto recebido como parametro do método
-				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); //caso não encontre nenhuma postagem, response = NOT FOUND 404
+		if(postagemRepository.existsById(postagem.getId())) { //testa se existe uma postagem com o id informado
+			if(temaRepository.existsById(postagem.getTema().getId())) { //testa se existe um tema com o id informado na postagem
+				return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem));
+			} else {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tema não existe!", null);
+			}
+		}
+		
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 	
 	@ResponseStatus(HttpStatus.NO_CONTENT) //determina que o método terá um status HTTP específico quando a requisição for bem sucedida, nesse caso será retornado o status 204 No content
