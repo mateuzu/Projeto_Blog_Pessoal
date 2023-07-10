@@ -16,7 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+/*
+ * A Classe BasicSecurityConfig é responsável por sobrescrever a configuração padrão da Spring Security e definir como ela irá funcionar.
+ * Nesta Classe vamos definir quais serão as formas de autenticação, quais endpoints serão protegidos pelo Token JWT, entre outras configurações.
+ * 
+ * Basicamente, é responsável por sobrescrever o padrão de segurança do Spring Security
+ */
 @Configuration
 @EnableWebSecurity
 public class BasicSecurityConfig {
@@ -36,7 +41,7 @@ public class BasicSecurityConfig {
     }
 
     @Bean
-    AuthenticationProvider authenticationProvider() {
+    AuthenticationProvider authenticationProvider() { //faz a verificação do usuario e senha
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
@@ -60,7 +65,7 @@ public class BasicSecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/usuarios/logar").permitAll()
+                        .requestMatchers("/usuarios/logar").permitAll() //liberando rotas para que o acesso seja realizado sem uma autenticação
                         .requestMatchers("/usuarios/cadastrar").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()

@@ -15,7 +15,9 @@ import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.model.Usuario;
 import com.generation.blogpessoal.repository.UsuarioRepository;
 import com.generation.blogpessoal.security.JwtService;
-
+/*
+ * A Classe UsuarioService é responsável por manipular as regras de negócio de usuário no sistema, definindo lógicas para cadastro e atualização de usuário
+ */
 @Service
 public class UsuarioService {
 
@@ -60,13 +62,13 @@ public class UsuarioService {
         // Gera o Objeto de autenticação
 		var credenciais = new UsernamePasswordAuthenticationToken(usuarioLogin.get().getUsuario(), usuarioLogin.get().getSenha());
 		
-        // Autentica o Usuario
+        // Autentica o Usuario com base nas credenciais
 		Authentication authentication = authenticationManager.authenticate(credenciais);
         
         // Se a autenticação foi efetuada com sucesso
 		if (authentication.isAuthenticated()) {
 
-            // Busca os dados do usuário
+            // Busca os dados do usuário do banco de dados
 			Optional<Usuario> usuario = usuarioRepository.findByUsuario(usuarioLogin.get().getUsuario());
 
             // Se o usuário foi encontrado
@@ -76,7 +78,7 @@ public class UsuarioService {
 			   usuarioLogin.get().setId(usuario.get().getId());
                usuarioLogin.get().setNome(usuario.get().getNome());
                usuarioLogin.get().setFoto(usuario.get().getFoto());
-               usuarioLogin.get().setToken(gerarToken(usuarioLogin.get().getUsuario()));
+               usuarioLogin.get().setToken(gerarToken(usuarioLogin.get().getUsuario())); //Gera o Token
                usuarioLogin.get().setSenha("");
 				
                // Retorna o Objeto preenchido
